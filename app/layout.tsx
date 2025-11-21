@@ -4,7 +4,7 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
-import { ThemeProvider } from "@/components/providers"
+import { ThemeProvider } from "../components/providers"
 
 export const metadata: Metadata = {
   title: "Análise GBO - Gráfico de Balanceamento de Operações",
