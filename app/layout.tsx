@@ -3,7 +3,8 @@ import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import "./globals.css"
-import { Toaster } from "@/components/ui/toaster"
+/* AQUI ESTÁ A MUDANÇA DE SEGURANÇA: Tudo com dois pontinhos */
+import { Toaster } from "../components/ui/toaster"
 import { ThemeProvider } from "../components/providers"
 
 export const metadata: Metadata = {
