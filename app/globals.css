@@ -1,5 +1,10 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ... mantenha suas cores aqui para baixo ... */
 
 @custom-variant dark (&:is(.dark *));
 
