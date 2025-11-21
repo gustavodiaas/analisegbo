@@ -3,14 +3,12 @@ import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import "./globals.css"
-/* CORREÇÃO: Usando caminhos diretos sem o arroba @ */
-import { Toaster } from "../components/ui/toaster" 
-import { ThemeProvider } from "./providers"
+// import { Toaster } from "../components/ui/toaster" <--- Comentei isso para não dar erro
+import { ThemeProvider } from "./providers" // <--- Caminho certo: vizinho (.)
 
 export const metadata: Metadata = {
-  title: "Análise GBO - Gráfico de Balanceamento de Operações",
-  description: "Sistema interativo para análise de GBO com exportação e importação de dados",
-  generator: "v0.app",
+  title: "Análise GBO",
+  description: "Sistema de análise GBO",
 }
 
 export default function RootLayout({
@@ -28,7 +26,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
-          <Toaster />
+          {/* <Toaster />  <--- Tirei daqui também */}
         </ThemeProvider>
       </body>
     </html>
