@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,9 +13,7 @@ import {
   Plus,
   BarChart3,
   Download,
-  Upload,
   FileText,
-  FileSpreadsheet,
   HelpCircle,
   CheckCircle2,
   AlertCircle,
@@ -23,7 +21,6 @@ import {
 import { GBOChart } from "@/components/gbo-chart"
 import { CalculationsDashboard } from "@/components/calculations-dashboard"
 import { DraggableOperationsList } from "@/components/draggable-operations-list"
-import { exportToExcel, importFromExcel } from "@/components/export-utils"
 import { useToast } from "@/hooks/use-toast"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import {
@@ -77,7 +74,6 @@ export default function GBOAnalysis() {
   }>({})
   const [isLoading, setIsLoading] = useState(false)
 
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -182,7 +178,6 @@ export default function GBOAnalysis() {
     }
   }
 
-  // --- NOVA FUNÇÃO DE EXPORTAR PDF COM GRÁFICO ---
   const handleExportPDF = async () => {
     if (operations.length === 0) {
       toast({
@@ -194,7 +189,6 @@ export default function GBOAnalysis() {
     }
 
     setIsLoading(true)
-    // Captura a área do gráfico pelo ID que adicionamos lá embaixo
     const element = document.getElementById('relatorio-gbo-area')
 
     if (!element) {
@@ -204,7 +198,7 @@ export default function GBOAnalysis() {
 
     try {
       const canvas = await html2canvas(element, {
-        scale: 2, // Alta qualidade
+        scale: 2,
         backgroundColor: document.documentElement.classList.contains("dark") ? "#1e1e2e" : "#ffffff"
       })
 
@@ -218,7 +212,6 @@ export default function GBOAnalysis() {
       pdf.setFontSize(12)
       pdf.text(`Gerado em: ${new Date().toLocaleDateString()}`, 10, 22)
       
-      // Adiciona a imagem do gráfico no PDF
       pdf.addImage(imgData, 'PNG', 0, 30, pdfWidth, pdfHeight)
 
       pdf.save(`analise-gbo-${Date.now()}.pdf`)
@@ -228,6 +221,7 @@ export default function GBOAnalysis() {
         description: "O gráfico foi salvo com sucesso.",
       })
     } catch (error) {
+      console.error(error)
       toast({
         title: "❌ Erro na exportação",
         description: "Não foi possível gerar a imagem do gráfico.",
@@ -238,74 +232,8 @@ export default function GBOAnalysis() {
     }
   }
 
-  const handleExportExcel = async () => {
-    if (operations.length === 0) {
-      toast({
-        title: "Nenhuma operação",
-        description: "Adicione operações antes de exportar.",
-        variant: "destructive",
-      })
-      return
-    }
-    setIsLoading(true)
-    try {
-      await exportToExcel(operations, timeUnit)
-      toast({
-        title: "✅ Excel exportado",
-        description: "O arquivo Excel foi baixado com sucesso.",
-      })
-    } catch (error) {
-      toast({
-        title: "❌ Erro na exportação",
-        description: error instanceof Error ? error.message : "Erro desconhecido.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleImportExcel = () => {
-    fileInputRef.current?.click()
-  }
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setIsLoading(true)
-    try {
-      const importedOperations = await importFromExcel(file)
-      if (importedOperations.length === 0) {
-        toast({
-          title: "Nenhuma operação encontrada",
-          description: "O arquivo não contém operações válidas.",
-          variant: "destructive",
-        })
-        return
-      }
-      setOperations(importedOperations)
-      toast({
-        title: "✅ Importação concluída",
-        description: `${importedOperations.length} operações foram importadas.`,
-      })
-    } catch (error) {
-      toast({
-        title: "❌ Erro na importação",
-        description: error instanceof Error ? error.message : "Erro desconhecido.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""
-    }
-  }
-
   return (
     <div className="min-h-screen bg-background">
-      <input ref={fileInputRef} type="file" accept=".xlsx,.xls" onChange={handleFileChange} className="hidden" />
-
       <header className="border-b border-border bg-card/50 backdrop-blur-sm tech-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
@@ -344,7 +272,6 @@ export default function GBOAnalysis() {
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 text-sm">
-                     {/* Conteúdo da Ajuda Mantido */}
                     <div>
                       <h4 className="font-semibold mb-2">O que é GBO?</h4>
                       <p className="text-muted-foreground">
@@ -501,28 +428,17 @@ export default function GBOAnalysis() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-2">
-                  <Button variant="outline" size="sm" className="flex-1" onClick={handleImportExcel}>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Importar
+                    {/* Botões de Importar/Exportar Excel removidos a pedido do usuário */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={handleExportPDF}
+                    disabled={operations.length === 0 || isLoading}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Exportar PDF (Gráfico)
                   </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="flex-1">
-                        <Download className="h-4 w-4 mr-2" />
-                        Exportar
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem onClick={handleExportPDF}>
-                        <FileText className="h-4 w-4 mr-2" />
-                        Exportar PDF (Gráfico)
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={handleExportExcel}>
-                        <FileSpreadsheet className="h-4 w-4 mr-2" />
-                        Exportar Excel
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
 
                 <DraggableOperationsList
@@ -537,7 +453,6 @@ export default function GBOAnalysis() {
 
           <div className="xl:col-span-2 space-y-6 lg:space-y-8">
             {operations.length > 0 ? (
-              // AQUI ESTÁ A ÁREA QUE SERÁ "FOTOGRAFADA" NO PDF
               <div id="relatorio-gbo-area" className="space-y-6 p-4 bg-background rounded-xl">
                 <div className="tech-card tech-glow">
                   <CalculationsDashboard
